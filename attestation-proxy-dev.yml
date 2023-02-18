@@ -1,0 +1,45 @@
+
+server:
+  port: 8088
+  tomcat:
+    relaxed-query-chars:
+      - '['
+      - ']'
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    enabled: true
+
+spring:
+  main:
+    web-application-type: reactive
+  cloud:
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+      metrics:
+        enabled: true
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: attestation-service
+          uri: lb://attestation-service
+          predicates:
+            - Path=/attestation-service/**
+          filters:
+            - StripPrefix=1
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/auth-service/**
+          filters:
+            - StripPrefix=1
+        - id: reports-service
+          uri: lb://reports-service
+          predicates:
+            - Path=/reports-service/**
+          filters:
+            - StripPrefix=1
